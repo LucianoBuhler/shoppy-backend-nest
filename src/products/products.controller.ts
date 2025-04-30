@@ -13,8 +13,8 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard)
   async createProduct(
     @Body() body: CreateProductRequest,
-    @CurrentUser() user: TokenPayload
+    @CurrentUser() user: TokenPayload,
   ) {
-    return this.productsService.createProduct(body, user.userId)
+    return this.productsService.createProduct(body, user.userId);
   }
 }

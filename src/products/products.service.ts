@@ -6,14 +6,14 @@ import { CreateProductRequest } from './dto/create-product.request';
 export class ProductsService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async createProduct(data: CreateProductRequest, userId: number){
+  async createProduct(data: CreateProductRequest, userId: number) {
     try {
       return await this.prismaService.product.create({
         data: {
           ...data,
           userId,
         },
-      })
+      });
     } catch (err) {
       if (err.code === 'P2002') {
         throw new UnprocessableEntityException('Name already in use');
