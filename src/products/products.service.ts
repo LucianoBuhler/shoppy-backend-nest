@@ -21,4 +21,8 @@ export class ProductsService {
       throw err;
     }
   }
+
+  async getProducts() {
+    return await this.prismaService.product.findMany();
+  }
 }
