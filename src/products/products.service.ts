@@ -1,9 +1,13 @@
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateProductRequest } from './dto/create-product.request';
 import { join } from 'path';
 import { promises as fs } from 'fs';
-import { Console } from 'console';
+import { PRODUCT_IMAGES } from './product-images';
 
 @Injectable()
 export class ProductsService {
@@ -36,6 +40,19 @@ export class ProductsService {
     );
   }
 
+  async getProduct(productId: number) {
+    try {
+      return {
+        ...(await this.prismaService.product.findUniqueOrThrow({
+          where: { id: productId },
+        })),
+        imageExists: await this.imageExists(productId),
+      };
+    } catch (err) {
+      throw new NotFoundException(`Product not found with ID ${productId}`);
+    }
+  }
+
 // ORIGINAL
   // private async imageExists(productId: number) {
   //   try {
@@ -50,10 +67,9 @@ export class ProductsService {
   // }
   private async imageExists(productId: number): Promise<boolean> {
     const extensions = ['.jpg', '.jpeg', '.png', '.webp'];
-    const basePath = join(__dirname, '../../', 'public/products');
 
     for (const ext of extensions) {
-      const filePath = join(basePath, `${productId}${ext}`);
+      const filePath = join(PRODUCT_IMAGES, `${productId}${ext}`);
       console.log('Checking file:', filePath); // Debugging line
       try {
         await fs.access(filePath, fs.constants.F_OK);
@@ -67,4 +83,6 @@ export class ProductsService {
 
     return false;
   }
+
+
 }
