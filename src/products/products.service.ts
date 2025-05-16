@@ -30,9 +30,15 @@ export class ProductsService {
     }
   }
 
-  async getProducts() {
+  async getProducts(status?: string) {
     // return await this.prismaService.product.findMany();
-    const products = await this.prismaService.product.findMany();
+    const args: Prisma.ProductFindManyArgs = {};
+    if (status === 'available') {
+      args.where = {
+        sold: false,
+      };
+    }
+    const products = await this.prismaService.product.findMany(args);
     return Promise.all(
       products.map(async (product) => ({
         ...product,
