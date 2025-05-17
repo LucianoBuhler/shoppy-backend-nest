@@ -9,19 +9,25 @@ import { join } from 'path';
 import { promises as fs } from 'fs';
 import { PRODUCT_IMAGES } from './product-images';
 import { Prisma } from '@prisma/client';
+import { ProductsGateway } from './products.gateway';
 
 @Injectable()
 export class ProductsService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly productsGateway: ProductsGateway,
+  ) {}
 
   async createProduct(data: CreateProductRequest, userId: number) {
     try {
-      return await this.prismaService.product.create({
+      const product = await this.prismaService.product.create({
         data: {
           ...data,
           userId,
         },
       });
+      this.productsGateway.handleProductUpdated();
+      return product;
     } catch (err) {
       if (err.code === 'P2002') {
         throw new UnprocessableEntityException('Name already in use');
@@ -65,6 +71,7 @@ export class ProductsService {
       where: { id: productId },
       data,
     });
+    this.productsGateway.handleProductUpdated();
   }
 
 // ORIGINAL
